@@ -1,0 +1,4 @@
+%% encoding: UTF-8
+{application,task}.
+{packages,[]}.
+{modules,[task]}.

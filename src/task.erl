@@ -11,6 +11,8 @@
 -export([wait_and_send/2]).
 -endif.
 
+-spec async(atom(), atom(), [term()]) -> {pid(), reference()}.
+
 async(Mod, Fun, Args) ->
     Me  = erlang:self(),
     Pid = proc_lib:spawn_link(?MODULE, async_do,
@@ -19,8 +21,12 @@ async(Mod, Fun, Args) ->
     erlang:send(Pid, {Me, Ref}),
     {Pid, Ref}.
 
+-spec await({pid(), reference()}) -> any() | no_return().
+
 await({Pid, Ref}) ->
     await({Pid, Ref}, 5000).
+
+-spec await({pid(), reference()}, non_neg_integer()) -> any() | no_return().
 
 await({Pid, Ref}, TimeOut) ->
     receive
@@ -38,6 +44,8 @@ await({Pid, Ref}, TimeOut) ->
         erlang:exit({timeout,
                     {?MODULE, await, [{Pid, Ref}, TimeOut]}})
     end.
+
+-spec async_do(pid(), {node(), pid() | atom()}, {atom(), atom(), [term()]}) -> term().
 
 async_do(TaskOwner, TaskOwnerInfo, MFA) ->
     initial_call(MFA),
@@ -158,6 +166,4 @@ task_await_5_test_() ->
 
     ?_assertEqual(catch task:await(Task), {'EXIT',{nodedown,nonode@nohost,{task,await,[Task,5000]}}}).
 
-
-    
 -endif.
