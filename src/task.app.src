@@ -1,6 +1,6 @@
 {application, task,
  [
-  {description, ""},
+  {description, "Elixir Task model partial implement in Erlang"},
   {vsn, "1"},
   {registered, []},
   {applications, [
