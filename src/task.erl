@@ -6,11 +6,6 @@
 
 -export([async_do/3]).
 
--ifdef(TEST).
--include_lib("eunit/include/eunit.hrl").
--export([wait_and_send/2]).
--endif.
-
 -spec async(atom(), atom(), [term()]) -> {pid(), reference()}.
 
 async(Mod, Fun, Args) ->
@@ -111,59 +106,3 @@ get_from(Other) ->
 get_running({Mod, Fun, Args}) ->
     {erlang:make_fun(Mod, Fun, erlang:length(Args)), Args}.
 
--ifdef(TEST).
-
-wait_and_send(TaskOwner, Atom) ->
-    erlang:send(TaskOwner, ready),
-    receive
-        true ->
-            true
-    end,
-    erlang:send(TaskOwner, Atom).
-
-%% async/3
-task_async_test_() ->
-    {Pid, _} = Task = task:async(task, wait_and_send, [self(), done]),
-    receive
-        ready ->
-            ok
-    end,
-
-    erlang:send(Pid, true),
-
-    [?_assertEqual(true, lists:member(Pid, erlang:element(2, erlang:process_info(self(), links)))),     
-     ?_assert(task:await(Task) =:= done)].
-
-%% await/1 exits on timeout
-task_await_1_test_() ->
-    Task = {undefined, erlang:make_ref()},
-    ?_assertEqual(catch task:await(Task, 0), {'EXIT', {timeout, {task, await, [Task, 0]}}}).
-
-%% await/1 exits on normal exit
-task_await_2_test_() ->
-    Task = task:async(erlang, exit, [normal]),
-    ?_assertEqual(catch task:await(Task), {'EXIT', {normal, {task, await, [Task, 5000]}}}).
-
-%% await/1 exits on task throw
-task_await_3_test_() ->
-    erlang:process_flag(trap_exit, true),
-    Task = task:async(erlang, throw, [unknown]),
-    ?_assertMatch({'EXIT',{{{nocatch,unknown},_},{task,await,[Task, 5000]}}}, catch task:await(Task)).
-
-%% await/1 exits on task exit
-task_await_4_test_() ->
-    erlang:process_flag(trap_exit, true),
-    Task = task:async(erlang, exit, [unknown]),
-    ?_assertEqual(catch task:await(Task), {'EXIT', {unknown, {task, await, [Task, 5000]}}}).
-
-%% await/1 exits on :noconnection
-task_await_5_test_() ->
-    Ref  = erlang:make_ref(),
-    Pid  = erlang:self(),
-    Task = {Pid, Ref},
-
-    erlang:send(Pid, {'DOWN', Ref, Pid, Pid, noconnection}),
-
-    ?_assertEqual(catch task:await(Task), {'EXIT',{nodedown,nonode@nohost,{task,await,[Task,5000]}}}).
-
--endif.
