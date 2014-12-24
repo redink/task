@@ -21,7 +21,8 @@ async(Mod, Fun, Args) ->
 await({Pid, Ref}) ->
     await({Pid, Ref}, 5000).
 
--spec await({pid(), reference()}, non_neg_integer()) -> any() | no_return().
+-spec await({pid(), reference()}, non_neg_integer()) ->
+                   any() | no_return().
 
 await({Pid, Ref}, TimeOut) ->
     receive
@@ -35,12 +36,15 @@ await({Pid, Ref}, TimeOut) ->
             erlang:exit({Reason,
                          {?MODULE, await, [{Pid, Ref}, TimeOut]}})
     after TimeOut ->
-        erlang:demonitor(Ref, [flush]),
-        erlang:exit({timeout,
-                    {?MODULE, await, [{Pid, Ref}, TimeOut]}})
+            erlang:demonitor(Ref, [flush]),
+            erlang:exit({timeout,
+                         {?MODULE, await, [{Pid, Ref}, TimeOut]}})
     end.
 
--spec async_do(pid(), {node(), pid() | atom()}, {atom(), atom(), [term()]}) -> term().
+-spec async_do(pid(),
+               {node(), pid() | atom()},
+               {atom(), atom(), [term()]}) ->
+                      term().
 
 async_do(TaskOwner, TaskOwnerInfo, MFA) ->
     initial_call(MFA),
@@ -72,9 +76,11 @@ do_apply(TaskOwnerInfo, {Mod, Fun, Args} = MFA) ->
         erlang:apply(Mod, Fun, Args)
     catch
         error: Value ->
-            task_exit(TaskOwnerInfo, MFA, {Value, erlang:get_stacktrace()});
+            task_exit(TaskOwnerInfo, MFA,
+                      {Value, erlang:get_stacktrace()});
         throw: Value ->
-            task_exit(TaskOwnerInfo, MFA, {{nocatch, Value}, erlang:get_stacktrace()});
+            task_exit(TaskOwnerInfo, MFA,
+                      {{nocatch, Value}, erlang:get_stacktrace()});
         exit: Value ->
             task_exit(TaskOwnerInfo, MFA, Value)
     end.
@@ -84,18 +90,21 @@ task_exit(_, _, normal) ->
 task_exit(_, _, shutdown) ->
     erlang:exit(shutdown);
 task_exit(_, _, Reason) when erlang:tuple_size(Reason) =:=2 
-                     andalso erlang:element(2, Reason) =:= shutdown ->
+                             andalso
+                             erlang:element(2, Reason) =:= shutdown ->
     erlang:exit(Reason);
 task_exit(TaskOwnerInfo, MFA, Reason) ->
     {Fun, Args} = get_running(MFA),
 
     error_logger:format(
-        "** Task ~p terminating~n" ++
-        "** Started from ~p~n" ++
-        "** When function == ~p~n" ++
-        "**      arguments == ~p~n" ++
-        "** Reason for termination == ~n" ++
-        "** ~p~n", [erlang:self(), get_from(TaskOwnerInfo), Fun, Args, Reason]),
+      "** Task ~p terminating~n" ++
+          "** Started from ~p~n" ++
+          "** When function == ~p~n" ++
+          "**      arguments == ~p~n" ++
+          "** Reason for termination == ~n" ++
+          "** ~p~n", [erlang:self(),
+                      get_from(TaskOwnerInfo),
+                      Fun, Args, Reason]),
     erlang:exit(Reason).
 
 get_from({Node, PidOrName}) when Node =:= erlang:node() ->

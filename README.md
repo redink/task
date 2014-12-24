@@ -11,29 +11,48 @@ In this repo, the way to spawn a task is with `task:async/3`. Then, a new proces
 
 ## usage
 ### compile and eunit
-	$ ./rebar com ; ./rebar eunit
+	$ ./rebar clean ; ./rebar com ; ./rebar eunit -v
+	==> task (clean)
 	==> task (compile)
+	Compiled src/task.erl
 	==> task (eunit)
-	
-	=ERROR REPORT==== 23-Dec-2014::13:52:31 ===
-	** Task <0.54.0> terminating
-	** Started from <0.46.0>
+	INFO:  sh info:
+		cwd: "~/workspace/task"
+		cmd: cp -R src/task.erl test/task_test.erl ".eunit"
+		Compiled src/task.erl
+		Compiled test/task_test.erl
+	INFO:  Cover compiling ~/workspace/task
+	======================== EUnit ========================
+	module 'task_test'
+	  task_test: task_test_ (async/3)...ok
+	  task_test: task_test_ (await/1 exits on timeout)...ok
+	  task_test: task_test_ (await/1 exits on normal exit)...ok
+	  task_test: task_test_ (await/1 exits on task throw)...ok
+	  task_test: task_test_ (await/1 exits on task exit)...
+	=ERROR REPORT==== 24-Dec-2014::10:51:51 ===
+	** Task <0.69.0> terminating
+	** Started from <0.62.0>
 	** When function == #Fun<erlang.throw.1>
 	**      arguments == [unknown]
 	** Reason for termination == 
 	** {{nocatch,unknown},
-	    [{task,do_apply,2,[{file,"src/task.erl"},{line,69}]},
-	     {task,async_do,3,[{file,"src/task.erl"},{line,49}]},
+	    [{task,do_apply,2,[{file,"src/task.erl"},{line,72}]},
+	     {task,async_do,3,[{file,"src/task.erl"},{line,52}]},
 	     {proc_lib,init_p_do_apply,3,[{file,"proc_lib.erl"},{line,239}]}]}
-
-	=ERROR REPORT==== 23-Dec-2014::13:52:31 ===
-	** Task <0.56.0> terminating
-	** Started from <0.46.0>
+	
+	=ERROR REPORT==== 24-Dec-2014::10:51:51 ===
+	** Task <0.71.0> terminating
+	** Started from <0.62.0>
 	** When function == #Fun<erlang.exit.1>
 	**      arguments == [unknown]
 	** Reason for termination == 
 	** unknown
-	  All 7 tests passed.
+	ok
+	  task_test: task_test_ (await/1 exits on noconnection)...ok
+	  [done in 0.018 s]
+	module 'task'
+	=======================================================
+	  All 6 tests passed.
 	Cover analysis: ~/workspace/task/.eunit/index.html
 	
 ### start
