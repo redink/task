@@ -33,6 +33,21 @@ task_test_() ->
                        ?assertEqual(true, lists:member(Pid, erlang:element(2, erlang:process_info(self(), links)))),
                        ?assertEqual(done, task:await(Task))
                end},
+              {"async/4",
+               fun() ->
+                       net_kernel:start(['test@127.0.0.1']),
+                       {Pid, _} = Task = task:async('test@127.0.0.1', ?MODULE, wait_and_send, [self(), done]),
+
+                       receive
+                           ready ->
+                               ok
+                       end,
+
+                       erlang:send(Pid, true),
+                       ?assertEqual('test@127.0.0.1', erlang:node(Pid)),
+                       ?assertEqual(true, lists:member(Pid, erlang:element(2, erlang:process_info(self(), links)))),
+                       ?assertEqual(done, task:await(Task))
+               end},
               {"await/1 exits on timeout",
                fun() ->
                        Task = {undefined, erlang:make_ref()},

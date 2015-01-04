@@ -1,6 +1,7 @@
 -module(task).
 
 -export([async/3,
+         async/4,
          await/1,
          await/2]).
 
@@ -11,6 +12,14 @@
 async(Mod, Fun, Args) ->
     Me  = erlang:self(),
     Pid = proc_lib:spawn_link(?MODULE, async_do,
+                              [Me, get_info(Me), {Mod, Fun, Args}]),
+    Ref = erlang:monitor(process, Pid),
+    erlang:send(Pid, {Me, Ref}),
+    {Pid, Ref}.
+
+async(Node, Mod, Fun, Args) ->
+    Me  = erlang:self(),
+    Pid = proc_lib:spawn_link(Node, ?MODULE, async_do,
                               [Me, get_info(Me), {Mod, Fun, Args}]),
     Ref = erlang:monitor(process, Pid),
     erlang:send(Pid, {Me, Ref}),
@@ -63,7 +72,7 @@ get_info(Pid) ->
             [{registered_name, RegisteredName}] ->
                 RegisteredName
         end,
-    {erlang:node(), Name}.
+    {erlang:node(Pid), Name}.
 
 initial_call(MFA) ->
     erlang:put('$initial_call', get_initial_call(MFA)).
