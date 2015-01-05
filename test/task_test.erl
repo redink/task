@@ -114,6 +114,22 @@ task_test_() ->
                        erlang:send(Pid, {'DOWN', Ref, Pid, Pid, noconnection}),
 
                        ?_assertEqual(catch task:await(Task), {'EXIT',{nodedown,nonode@nohost,{task,await,[Task,5000]}}})
+               end},
+              {"safe_await/2 exits on noconnection",
+               fun() ->
+                       Ref  = erlang:make_ref(),
+                       Pid  = erlang:self(),
+                       Task = {Pid, Ref},
+
+                       erlang:send(Pid, {'DOWN', Ref, Pid, Pid, noconnection}),
+
+                       ?_assertEqual({false, []}, task:safe_await(Task, {false, []}))
+               end},
+              {"safe_await/2 exits on task exit",
+               fun() ->
+                       erlang:process_flag(trap_exit, true),
+                       Task = task:async(erlang, exit, [unknown]),
+                       ?_assertEqual({false, []}, task:safe_await(Task, {false, []}))
                end}
              ]
      end

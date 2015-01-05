@@ -8,6 +8,9 @@
 -export([async_opt/4,
          async_opt/5]).
 
+-export([safe_await/2,
+         safe_await/3]).
+
 -export([async_do/3]).
 
 -spec async(atom(), atom(), [term()]) -> {pid(), reference()}.
@@ -75,6 +78,21 @@ await({Pid, Ref}, TimeOut) ->
             erlang:demonitor(Ref, [flush]),
             erlang:exit({timeout,
                          {?MODULE, await, [{Pid, Ref}, TimeOut]}})
+    end.
+
+-spec safe_await({pid(), reference()}, term()) -> any().
+
+safe_await(TaskRef, DefaultResult) ->
+    safe_await(TaskRef, DefaultResult, 5000).
+
+-spec safe_await({pid(), reference()}, term(), non_neg_integer()) -> any().
+
+safe_await(TaskRef, DefaultResult, TimeOut) ->
+    case catch await(TaskRef, TimeOut) of
+        {'EXIT', _} ->
+            DefaultResult;
+        Any ->
+            Any
     end.
 
 -spec async_do(pid(),

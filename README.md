@@ -52,10 +52,20 @@ In this repo, the way to spawn a task is with `task:async/3`. Then, a new proces
 	** unknown
 	ok
 	  task_test: task_test_ (await/1 exits on noconnection)...ok
-	  [done in 0.018 s]
+	  task_test: task_test_ (safe_await/2 exits on noconnection)...
+	=ERROR REPORT==== 5-Jan-2015::18:39:20 ===
+	** Task <0.72.0> terminating
+	** Started from <0.47.0>
+	** When function == #Fun<erlang.exit.1>
+	**      arguments == [unknown]
+	** Reason for termination ==
+	** unknown
+	ok
+	  task_test: task_test_ (safe_await/2 exits on task exit)...ok
+	  [done in 0.045 s]
 	module 'task'
 	=======================================================
-	  All 9 tests passed.
+	  All 11 tests passed.
 	Cover analysis: ~/workspace/task/.eunit/index.html
 	
 ### start
