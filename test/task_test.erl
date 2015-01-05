@@ -38,13 +38,48 @@ task_test_() ->
                        net_kernel:start(['test@127.0.0.1']),
                        {Pid, _} = Task = task:async('test@127.0.0.1', ?MODULE, wait_and_send, [self(), done]),
 
+                       ?assertEqual('test@127.0.0.1', erlang:node(Pid)),
                        receive
                            ready ->
                                ok
                        end,
 
                        erlang:send(Pid, true),
+                       ?assertEqual(true, lists:member(Pid, erlang:element(2, erlang:process_info(self(), links)))),
+                       ?assertEqual(done, task:await(Task))
+               end},
+              {"async_opt/4",
+               fun() ->
+                       Opts = [{fullsweep_after, 10}, {priority, high}],
+                       {Pid, _} = Task = task:async_opt(?MODULE, wait_and_send, [self(), done], Opts),
+                       ?assertEqual({priority, high}, erlang:process_info(Pid, priority)),
+                       ?assertEqual(10, proplists:get_value(fullsweep_after, erlang:element(2, erlang:process_info(Pid, garbage_collection)))),
+
+                       receive
+                           ready ->
+                               ok
+                       end,
+
+                       erlang:send(Pid, true),
+                       ?assertEqual(true, lists:member(Pid, erlang:element(2, erlang:process_info(self(), links)))),
+                       ?assertEqual(done, task:await(Task))
+               end},
+              {"async_opt/5",
+               fun() ->
+                       net_kernel:start(['test@127.0.0.1']),
+                       Opts = [{fullsweep_after, 10}, {priority, high}],
+                       {Pid, _} = Task = task:async_opt('test@127.0.0.1', ?MODULE, wait_and_send, [self(), done], Opts),
+
                        ?assertEqual('test@127.0.0.1', erlang:node(Pid)),
+                       ?assertEqual({priority, high}, erlang:process_info(Pid, priority)),
+                       ?assertEqual(10, proplists:get_value(fullsweep_after, erlang:element(2, erlang:process_info(Pid, garbage_collection)))),
+
+                       receive
+                           ready ->
+                               ok
+                       end,
+
+                       erlang:send(Pid, true),
                        ?assertEqual(true, lists:member(Pid, erlang:element(2, erlang:process_info(self(), links)))),
                        ?assertEqual(done, task:await(Task))
                end},

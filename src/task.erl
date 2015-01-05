@@ -5,6 +5,9 @@
          await/1,
          await/2]).
 
+-export([async_opt/4,
+         async_opt/5]).
+
 -export([async_do/3]).
 
 -spec async(atom(), atom(), [term()]) -> {pid(), reference()}.
@@ -17,10 +20,34 @@ async(Mod, Fun, Args) ->
     erlang:send(Pid, {Me, Ref}),
     {Pid, Ref}.
 
+-spec async(atom(), atom(), atom(), [term()]) -> {pid(), reference()}.
+
 async(Node, Mod, Fun, Args) ->
     Me  = erlang:self(),
     Pid = proc_lib:spawn_link(Node, ?MODULE, async_do,
                               [Me, get_info(Me), {Mod, Fun, Args}]),
+    Ref = erlang:monitor(process, Pid),
+    erlang:send(Pid, {Me, Ref}),
+    {Pid, Ref}.
+
+-spec async_opt(atom(), atom(), [term()], [term()]) -> {pid(), reference()}.
+
+async_opt(Mod, Fun, Args, Opts) ->
+    Me  = erlang:self(),
+    Pid = proc_lib:spawn_opt(?MODULE, async_do,
+                             [Me, get_info(Me), {Mod, Fun, Args}],
+                             [link | Opts]),
+    Ref = erlang:monitor(process, Pid),
+    erlang:send(Pid, {Me, Ref}),
+    {Pid, Ref}.
+
+-spec async_opt(atom(), atom(), atom(), [term()], [term()]) -> {pid(), reference()}.
+
+async_opt(Node, Mod, Fun, Args, Opts) ->
+    Me  = erlang:self(),
+    Pid = proc_lib:spawn_opt(Node, ?MODULE, async_do,
+                             [Me, get_info(Me), {Mod, Fun, Args}],
+                             [link | Opts]),
     Ref = erlang:monitor(process, Pid),
     erlang:send(Pid, {Me, Ref}),
     {Pid, Ref}.

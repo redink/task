@@ -26,6 +26,8 @@ In this repo, the way to spawn a task is with `task:async/3`. Then, a new proces
 	module 'task_test'
 	  task_test: task_test_ (async/3)...ok
 	  task_test: task_test_ (async/4)...[0.009 s] ok
+	  task_test: task_test_ (async_opt/4)...ok
+	  task_test: task_test_ (async_opt/5)...[0.001 s] ok
 	  task_test: task_test_ (await/1 exits on timeout)...ok
 	  task_test: task_test_ (await/1 exits on normal exit)...ok
 	  task_test: task_test_ (await/1 exits on task throw)...ok
@@ -53,7 +55,7 @@ In this repo, the way to spawn a task is with `task:async/3`. Then, a new proces
 	  [done in 0.018 s]
 	module 'task'
 	=======================================================
-	  All 7 tests passed.
+	  All 9 tests passed.
 	Cover analysis: ~/workspace/task/.eunit/index.html
 	
 ### start
@@ -105,4 +107,3 @@ Now, `Task` support remote node call, you can use it like:
 ### being soon ...
 
 * anonymous function
-* process spawn opts
