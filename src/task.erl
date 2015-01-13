@@ -2,16 +2,30 @@
 
 -export([async/3,
          async/4,
+         async/1,
+         async/2,
          await/1,
          await/2]).
 
 -export([async_opt/4,
-         async_opt/5]).
+         async_opt/5,
+         async_opt/2,
+         async_opt/3]).
 
 -export([safe_await/2,
          safe_await/3]).
 
 -export([async_do/3]).
+
+-spec async(function()) -> {pid(), reference()}.
+
+async(Fun) when erlang:is_function(Fun) ->
+    async(erlang, apply, [Fun, []]).
+
+-spec async(atom(), function()) -> {pid(), reference()}.
+
+async(Node, Fun) when erlang:is_function(Fun) ->
+    async(Node, erlang, apply, [Fun, []]). 
 
 -spec async(atom(), atom(), [term()]) -> {pid(), reference()}.
 
@@ -32,6 +46,16 @@ async(Node, Mod, Fun, Args) ->
     Ref = erlang:monitor(process, Pid),
     erlang:send(Pid, {Me, Ref}),
     {Pid, Ref}.
+
+-spec async_opt(function(), [term()]) -> {pid(), reference()}.
+
+async_opt(Fun, Opts) when erlang:is_function(Fun) ->
+    async_opt(erlang, apply, [Fun, []], Opts).
+
+-spec async_opt(atom(), function(), [term()]) -> {pid(), reference()}.
+
+async_opt(Node, Fun, Opts) when erlang:is_function(Fun) ->
+    async_opt(Node, erlang, apply, [Fun, []], Opts).
 
 -spec async_opt(atom(), atom(), [term()], [term()]) -> {pid(), reference()}.
 

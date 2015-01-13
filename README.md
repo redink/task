@@ -11,62 +11,64 @@ In this repo, the way to spawn a task is with `task:async/3`. Then, a new proces
 
 ## usage
 ### compile and eunit
-	$ ./rebar clean ; ./rebar com ; ./rebar eunit -v
-	==> task (clean)
+	$ ./rebar com ; ./rebar eunit -v
 	==> task (compile)
-	Compiled src/task.erl
-	==> task (eunit)
-	INFO:  sh info:
-		cwd: "~/workspace/task"
-		cmd: cp -R src/task.erl test/task_test.erl ".eunit"
-		Compiled src/task.erl
-		Compiled test/task_test.erl
-	INFO:  Cover compiling ~/workspace/task
-	======================== EUnit ========================
-	module 'task_test'
-	  task_test: task_test_ (async/3)...ok
-	  task_test: task_test_ (async/4)...[0.009 s] ok
-	  task_test: task_test_ (async_opt/4)...ok
-	  task_test: task_test_ (async_opt/5)...[0.001 s] ok
-	  task_test: task_test_ (await/1 exits on timeout)...ok
-	  task_test: task_test_ (await/1 exits on normal exit)...ok
-	  task_test: task_test_ (await/1 exits on task throw)...ok
-	  task_test: task_test_ (await/1 exits on task exit)...
-	=ERROR REPORT==== 24-Dec-2014::10:51:51 ===
-	** Task <0.69.0> terminating
-	** Started from <0.62.0>
-	** When function == #Fun<erlang.throw.1>
-	**      arguments == [unknown]
-	** Reason for termination == 
-	** {{nocatch,unknown},
-	    [{task,do_apply,2,[{file,"src/task.erl"},{line,72}]},
-	     {task,async_do,3,[{file,"src/task.erl"},{line,52}]},
-	     {proc_lib,init_p_do_apply,3,[{file,"proc_lib.erl"},{line,239}]}]}
-	
-	=ERROR REPORT==== 24-Dec-2014::10:51:51 ===
-	** Task <0.71.0> terminating
-	** Started from <0.62.0>
-	** When function == #Fun<erlang.exit.1>
-	**      arguments == [unknown]
-	** Reason for termination == 
-	** unknown
-	ok
-	  task_test: task_test_ (await/1 exits on noconnection)...ok
-	  task_test: task_test_ (safe_await/2 exits on noconnection)...
-	=ERROR REPORT==== 5-Jan-2015::18:39:20 ===
-	** Task <0.72.0> terminating
-	** Started from <0.47.0>
-	** When function == #Fun<erlang.exit.1>
-	**      arguments == [unknown]
-	** Reason for termination ==
-	** unknown
-	ok
-	  task_test: task_test_ (safe_await/2 exits on task exit)...ok
-	  [done in 0.045 s]
-	module 'task'
-	=======================================================
-	  All 11 tests passed.
-	Cover analysis: ~/workspace/task/.eunit/index.html
+    ==> task (eunit)
+    INFO:  sh info:
+    	cwd: "/Users/redink/github/task"
+    	cmd: cp -R src/task.erl test/task_test.erl ".eunit"
+    INFO:  Skipped src/task.erl
+    Compiled test/task_test.erl
+    INFO:  Cover compiling /Users/redink/github/task
+    ======================== EUnit ========================
+    module 'task_test'
+      task_test: task_test_ (async/1)...ok
+      task_test: task_test_ (async/2)...[0.010 s] ok
+      task_test: task_test_ (async/3)...ok
+      task_test: task_test_ (async/4)...ok
+      task_test: task_test_ (async_opt/2)...ok
+      task_test: task_test_ (async_opt/3)...ok
+      task_test: task_test_ (async_opt/4)...ok
+      task_test: task_test_ (async_opt/5)...ok
+      task_test: task_test_ (await/1 exits on timeout)...ok
+      task_test: task_test_ (await/1 exits on normal exit)...ok
+      task_test: task_test_ (await/1 exits on task throw)...
+    =ERROR REPORT==== 13-Jan-2015::17:24:41 ===
+    ** Task <0.84.0> terminating
+    ** Started from <0.57.0>
+    ** When function == #Fun<erlang.throw.1>
+    **      arguments == [unknown]
+    ** Reason for termination == 
+    ** {{nocatch,unknown},
+        [{task,do_apply,2,[{file,"src/task.erl"},{line,154}]},
+         {task,async_do,3,[{file,"src/task.erl"},{line,134}]},
+         {proc_lib,init_p_do_apply,3,[{file,"proc_lib.erl"},{line,237}]}]}
+
+    =ERROR REPORT==== 13-Jan-2015::17:24:41 ===
+    ** Task <0.86.0> terminating
+    ** Started from <0.57.0>
+    ** When function == #Fun<erlang.exit.1>
+    **      arguments == [unknown]
+    ** Reason for termination == 
+    ** unknown
+    ok
+      task_test: task_test_ (await/1 exits on task exit)...ok
+      task_test: task_test_ (await/1 exits on noconnection)...ok
+      task_test: task_test_ (safe_await/2 exits on noconnection)...
+    =ERROR REPORT==== 13-Jan-2015::17:24:41 ===
+    ** Task <0.90.0> terminating
+    ** Started from <0.57.0>
+    ** When function == #Fun<erlang.exit.1>
+    **      arguments == [unknown]
+    ** Reason for termination == 
+    ** unknown
+    ok
+      task_test: task_test_ (safe_await/2 exits on task exit)...ok
+      [done in 0.054 s]
+    module 'task'
+    =======================================================
+      All 15 tests passed.
+    Cover analysis: /Users/redink/github/task/.eunit/index.html
 	
 ### start
 	$ erl -pa ./ebin
@@ -114,6 +116,3 @@ Now, `Task` support remote node call, you can use it like:
 	6> task:await(v(5)).
 	<6206.43.0>
 	
-### being soon ...
-
-* anonymous function

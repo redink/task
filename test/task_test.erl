@@ -19,6 +19,37 @@ task_test_() ->
      end,
      fun(_) ->
              [
+              {"async/1",
+               fun() ->
+                       Me = erlang:self(),
+                       {Pid, _} = Task = task:async(fun() -> wait_and_send(Me, done) end),
+
+                       receive
+                           ready ->
+                               ok
+                       end,
+
+                       erlang:send(Pid, true),
+
+                       ?assertEqual(true, lists:member(Pid, erlang:element(2, erlang:process_info(self(), links)))),
+                       ?assertEqual(done, task:await(Task))
+               end},
+              {"async/2",
+               fun() ->
+                       Me = erlang:self(),
+                       net_kernel:start(['test@127.0.0.1']),
+                       {Pid, _} = Task = task:async('test@127.0.0.1', fun() -> wait_and_send(Me, done) end),
+
+                       ?assertEqual('test@127.0.0.1', erlang:node(Pid)),
+                       receive
+                           ready ->
+                               ok
+                       end,
+
+                       erlang:send(Pid, true),
+                       ?assertEqual(true, lists:member(Pid, erlang:element(2, erlang:process_info(self(), links)))),
+                       ?assertEqual(done, task:await(Task))
+               end},               
               {"async/3",
                fun() ->
                        {Pid, _} = Task = task:async(?MODULE, wait_and_send, [self(), done]),
@@ -32,7 +63,7 @@ task_test_() ->
 
                        ?assertEqual(true, lists:member(Pid, erlang:element(2, erlang:process_info(self(), links)))),
                        ?assertEqual(done, task:await(Task))
-               end},
+               end},               
               {"async/4",
                fun() ->
                        net_kernel:start(['test@127.0.0.1']),
@@ -48,6 +79,43 @@ task_test_() ->
                        ?assertEqual(true, lists:member(Pid, erlang:element(2, erlang:process_info(self(), links)))),
                        ?assertEqual(done, task:await(Task))
                end},
+              {"async_opt/2",
+               fun() ->
+                       Opts = [{fullsweep_after, 10}, {priority, high}],
+                       Me = erlang:self(),
+                       {Pid, _} = Task = task:async_opt(fun() -> wait_and_send(Me, done) end, Opts),
+                       ?assertEqual({priority, high}, erlang:process_info(Pid, priority)),
+                       ?assertEqual(10, proplists:get_value(fullsweep_after, erlang:element(2, erlang:process_info(Pid, garbage_collection)))),
+
+                       receive
+                           ready ->
+                               ok
+                       end,
+
+                       erlang:send(Pid, true),
+                       ?assertEqual(true, lists:member(Pid, erlang:element(2, erlang:process_info(self(), links)))),
+                       ?assertEqual(done, task:await(Task))
+               end},
+              {"async_opt/3",
+               fun() ->
+                       net_kernel:start(['test@127.0.0.1']),
+                       Opts = [{fullsweep_after, 10}, {priority, high}],
+                       Me = erlang:self(),
+                       {Pid, _} = Task = task:async_opt('test@127.0.0.1', fun() -> wait_and_send(Me, done) end, Opts),
+
+                       ?assertEqual('test@127.0.0.1', erlang:node(Pid)),
+                       ?assertEqual({priority, high}, erlang:process_info(Pid, priority)),
+                       ?assertEqual(10, proplists:get_value(fullsweep_after, erlang:element(2, erlang:process_info(Pid, garbage_collection)))),
+
+                       receive
+                           ready ->
+                               ok
+                       end,
+
+                       erlang:send(Pid, true),
+                       ?assertEqual(true, lists:member(Pid, erlang:element(2, erlang:process_info(self(), links)))),
+                       ?assertEqual(done, task:await(Task))
+               end},               
               {"async_opt/4",
                fun() ->
                        Opts = [{fullsweep_after, 10}, {priority, high}],
