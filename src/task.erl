@@ -18,17 +18,14 @@
 -export([async_do/3]).
 
 -spec async(function()) -> {pid(), reference()}.
-
 async(Fun) when erlang:is_function(Fun) ->
     async(erlang, apply, [Fun, []]).
 
 -spec async(atom(), function()) -> {pid(), reference()}.
-
 async(Node, Fun) when erlang:is_function(Fun) ->
     async(Node, erlang, apply, [Fun, []]). 
 
 -spec async(atom(), atom(), [term()]) -> {pid(), reference()}.
-
 async(Mod, Fun, Args) ->
     Me  = erlang:self(),
     Pid = proc_lib:spawn_link(?MODULE, async_do,
@@ -38,7 +35,6 @@ async(Mod, Fun, Args) ->
     {Pid, Ref}.
 
 -spec async(atom(), atom(), atom(), [term()]) -> {pid(), reference()}.
-
 async(Node, Mod, Fun, Args) ->
     Me  = erlang:self(),
     Pid = proc_lib:spawn_link(Node, ?MODULE, async_do,
@@ -48,17 +44,15 @@ async(Node, Mod, Fun, Args) ->
     {Pid, Ref}.
 
 -spec async_opt(function(), [term()]) -> {pid(), reference()}.
-
 async_opt(Fun, Opts) when erlang:is_function(Fun) ->
     async_opt(erlang, apply, [Fun, []], Opts).
 
 -spec async_opt(atom(), function(), [term()]) -> {pid(), reference()}.
-
 async_opt(Node, Fun, Opts) when erlang:is_function(Fun) ->
     async_opt(Node, erlang, apply, [Fun, []], Opts).
 
--spec async_opt(atom(), atom(), [term()], [term()]) -> {pid(), reference()}.
-
+-spec async_opt(atom(), atom(),
+                [term()], [term()]) -> {pid(), reference()}.
 async_opt(Mod, Fun, Args, Opts) ->
     Me  = erlang:self(),
     Pid = proc_lib:spawn_opt(?MODULE, async_do,
@@ -68,8 +62,8 @@ async_opt(Mod, Fun, Args, Opts) ->
     erlang:send(Pid, {Me, Ref}),
     {Pid, Ref}.
 
--spec async_opt(atom(), atom(), atom(), [term()], [term()]) -> {pid(), reference()}.
-
+-spec async_opt(atom(), atom(), atom(),
+                [term()], [term()]) -> {pid(), reference()}.
 async_opt(Node, Mod, Fun, Args, Opts) ->
     Me  = erlang:self(),
     Pid = proc_lib:spawn_opt(Node, ?MODULE, async_do,
@@ -80,13 +74,11 @@ async_opt(Node, Mod, Fun, Args, Opts) ->
     {Pid, Ref}.
 
 -spec await({pid(), reference()}) -> any() | no_return().
-
 await({Pid, Ref}) ->
     await({Pid, Ref}, 5000).
 
--spec await({pid(), reference()}, non_neg_integer()) ->
-                   any() | no_return().
-
+-spec await({pid(), reference()},
+            non_neg_integer()) -> any() | no_return().
 await({Pid, Ref}, TimeOut) ->
     receive
         {Ref, Reply} ->
@@ -105,12 +97,11 @@ await({Pid, Ref}, TimeOut) ->
     end.
 
 -spec safe_await({pid(), reference()}, term()) -> any().
-
 safe_await(TaskRef, DefaultResult) ->
     safe_await(TaskRef, DefaultResult, 5000).
 
--spec safe_await({pid(), reference()}, term(), non_neg_integer()) -> any().
-
+-spec safe_await({pid(), reference()},
+                 term(), non_neg_integer()) -> any().
 safe_await(TaskRef, DefaultResult, TimeOut) ->
     case catch await(TaskRef, TimeOut) of
         {'EXIT', _} ->
@@ -119,11 +110,8 @@ safe_await(TaskRef, DefaultResult, TimeOut) ->
             Any
     end.
 
--spec async_do(pid(),
-               {node(), pid() | atom()},
-               {atom(), atom(), [term()]}) ->
-                      term().
-
+-spec async_do(pid(), {node(), pid() | atom()},
+               {atom(), atom(), [term()]}) -> term().
 async_do(TaskOwner, TaskOwnerInfo, MFA) ->
     initial_call(MFA),
     Ref =
@@ -192,4 +180,3 @@ get_from(Other) ->
 
 get_running({Mod, Fun, Args}) ->
     {erlang:make_fun(Mod, Fun, erlang:length(Args)), Args}.
-
